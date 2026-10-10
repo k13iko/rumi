@@ -141,3 +141,279 @@ svg.i {
 .a3 { background: var(--av3); }
 .a4 { background: var(--av4); }
 .a5 { background: var(--av5); }
+
+/* ---------- Page layout ---------- */
+/* Two columns: a 220px sidebar, and the rest of the width for the page */
+.app {
+  display: grid;
+  grid-template-columns: 220px minmax(0, 1fr);
+  min-height: 100vh;
+}
+
+.main {
+  min-width: 0; /* lets long content shrink instead of stretching the page */
+}
+
+.content {
+  padding: 28px 32px 48px;
+  max-width: 1240px;
+}
+
+h1 {
+  font-size: 30px;
+  line-height: 1.15;
+  letter-spacing: -0.025em;
+  font-weight: 600;
+  margin: 0;
+}
+
+/* ---------- Sidebar ---------- */
+/* Stays in place while the page scrolls */
+.rail {
+  border-right: 1px solid var(--line);
+  padding: 20px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  min-width: 0;
+}
+
+.brand {
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  padding: 4px 12px 18px;
+}
+
+.nav {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.nav button {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  border: 0;
+  background: none;
+  border-radius: 8px;
+  color: var(--muted);
+  font-weight: 500;
+  text-align: left;
+}
+
+.nav button:hover {
+  background: var(--surface-2);
+  color: var(--fg);
+}
+
+/* The page you are on gets the green highlight */
+.nav button[aria-current='page'] {
+  background: var(--accent);
+  color: var(--accent-fg);
+}
+
+/* Thin divider line */
+.sep {
+  height: 1px;
+  background: var(--line);
+  margin: 14px 0;
+}
+
+/* Small uppercase heading */
+.label {
+  font-size: 10.5px;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--muted);
+  font-weight: 600;
+}
+
+.hh-head {
+  padding: 0 12px;
+  color: var(--muted);
+}
+
+/* The household switcher button */
+.hh {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  width: 100%;
+  border: 0;
+  background: none;
+  border-radius: 8px;
+  text-align: left;
+  margin-top: 6px;
+}
+
+.hh:hover {
+  background: var(--surface-2);
+}
+
+.hh b {
+  display: block;
+  font-weight: 600;
+  font-size: 13px;
+}
+
+.hh small {
+  color: var(--muted);
+  font-size: 11.5px;
+}
+
+/* A button that looks like a green text link */
+.link {
+  color: var(--accent);
+  font-size: 12px;
+  font-weight: 600;
+  background: none;
+  border: 0;
+  padding: 4px 12px;
+  display: inline-flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.link:hover {
+  text-decoration: underline;
+}
+
+/* Pushes Settings to the bottom of the sidebar */
+.rail .spacer {
+  flex: 1;
+}
+
+/* ---------- Top bar ---------- */
+.top {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 14px 32px;
+  border-bottom: 1px solid var(--line);
+}
+
+.search {
+  flex: 1;
+  max-width: 520px;
+  margin: 0 auto;
+  position: relative; /* so the icon can sit inside the box */
+}
+
+.search svg {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--muted);
+}
+
+.search input {
+  width: 100%;
+  background: var(--surface-2);
+  border: 1px solid transparent;
+  border-radius: 8px;
+  padding: 10px 12px 10px 36px; /* extra left space for the icon */
+  font: inherit;
+  color: var(--fg);
+}
+
+.search input::placeholder {
+  color: var(--muted);
+}
+
+.search input:focus {
+  outline: 2px solid var(--accent);
+  background: var(--surface);
+}
+
+.user {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-weight: 500;
+}
+
+.bell {
+  position: relative;
+  background: none;
+  border: 0;
+  padding: 4px;
+  color: var(--muted);
+}
+
+/* The small red dot, shown when the bell has class "on" */
+.bell.on::after {
+  content: '';
+  position: absolute;
+  top: 3px;
+  right: 4px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--owe);
+}
+
+/* ---------- Phones: sidebar becomes a strip across the top ---------- */
+@media (max-width: 760px) {
+  .app {
+    display: block;
+  }
+
+  .rail {
+    position: static;
+    height: auto;
+    flex-direction: row;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 16px;
+    border-right: 0;
+    border-bottom: 1px solid var(--line);
+    overflow-x: auto;
+  }
+
+  .brand {
+    padding: 0 8px 0 0;
+  }
+
+  .nav {
+    flex-direction: row;
+  }
+
+  .nav button {
+    padding: 8px 12px;
+    white-space: nowrap;
+  }
+
+  /* Only show the label on the current page; the others are icons */
+  .nav button span {
+    display: none;
+  }
+
+  .nav button[aria-current='page'] span {
+    display: inline;
+  }
+
+  /* Hide the less important parts on small screens */
+  .rail .sep,
+  .rail .hh-block,
+  .rail .spacer,
+  .rail .settings,
+  .user .name {
+    display: none;
+  }
+
+  .top {
+    padding: 12px 16px;
+  }
+
+  .content {
+    padding: 20px 16px 40px;
+  }
+}
