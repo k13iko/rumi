@@ -104,3 +104,40 @@ button {
   outline: 2px solid var(--accent);
   outline-offset: 2px;
 }
+
+/* Icons: outline only, drawn in the surrounding text color */
+svg.i {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.7;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  flex: none;
+}
+
+/* Avatars: a colored circle with a letter */
+.av {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--fg);
+  flex: none;
+}
+
+/* Smaller version for the ledger table */
+.av.sm {
+  width: 24px;
+  height: 24px;
+  font-size: 10px;
+}
+
+/* One class per color (from the --av tokens) */
+.a1 { background: var(--av1); }
+.a2 { background: var(--av2); }
+.a3 { background: var(--av3); }
+.a4 { background: var(--av4); }
+.a5 { background: var(--av5); }
