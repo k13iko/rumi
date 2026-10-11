@@ -616,3 +616,144 @@ h1 {
     font-size: 32px;
   }
 }
+
+/* ---------- Ledger table ---------- */
+.card-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+/* If the table is too wide, it scrolls sideways inside the card */
+.table-wrap {
+  overflow-x: auto;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 560px;
+}
+
+th {
+  background: var(--surface-2);
+  text-align: left;
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+  font-weight: 600;
+  padding: 12px 14px;
+}
+
+/* Round the left end of the first heading and the right end of the last */
+th:first-child {
+  border-radius: 8px 0 0 8px;
+}
+
+th:last-child {
+  border-radius: 0 8px 8px 0;
+  text-align: right;
+}
+
+td {
+  padding: 16px 14px;
+  vertical-align: middle;
+  border-bottom: 1px solid var(--line);
+}
+
+tr:last-child td {
+  border-bottom: 0;
+}
+
+/* The amounts column: right-aligned, digits lined up */
+td.num {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Icon circle + description text */
+.desc {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.desc b {
+  font-weight: 600;
+  display: block;
+}
+
+.desc small,
+.split,
+.note {
+  color: var(--muted);
+  font-size: 11.5px;
+}
+
+.ico {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: var(--surface-2);
+  color: var(--muted);
+  display: grid;
+  place-items: center;
+  flex: none;
+}
+
+.payer {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 500;
+}
+
+/* Money coming to you (green) and money you owe (orange) */
+.pos {
+  color: var(--owed);
+  font-weight: 700;
+  display: block;
+}
+
+.neg {
+  color: var(--owe);
+  font-weight: 700;
+  display: block;
+}
+
+.settled {
+  color: var(--accent);
+  font-weight: 600;
+  font-size: 12px;
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+/* Bottom line of the card */
+.foot {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 18px;
+  color: var(--muted);
+  font-size: 11.5px;
+  align-items: center;
+}
+
+.foot .link {
+  padding: 0;
+}
+
+/* Message shown when a list has nothing in it */
+.empty {
+  color: var(--muted);
+  text-align: center;
+  padding: 24px 8px;
+  font-size: 13px;
+}
