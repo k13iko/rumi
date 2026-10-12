@@ -50,3 +50,34 @@ export function netBalances(expenses: Expense[], meId: string): Map<string, numb
   }
   return net
 }
+
+// The two month figures shown on the balance card
+export interface MonthTotals {
+  totalCents: number // everything the household spent this month
+  yourShareCents: number // your part of that
+}
+
+// "now" has a default value, so callers can leave it out and get the current date
+export function monthTotals(expenses: Expense[], meId: string, now = new Date()): MonthTotals {
+  // Build a text like "2026-10" for the current month.
+  // getMonth() counts from 0 (January is 0), so we add 1.
+  // padStart makes sure a single digit gets a leading zero: "9" -> "09".
+  const prefix = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`
+
+  let totalCents = 0
+  let yourShareCents = 0
+
+  for (const e of expenses) {
+    // Skip expenses from other months. Dates look like "2026-10-04",
+    // so we just check whether the date starts with "2026-10".
+    if (!e.expense_date.startsWith(prefix)) continue
+
+    totalCents += e.total_cents
+
+    // Find your share of this expense. "?." means "if it exists",
+    // and "?? 0" means "otherwise use 0" (for expenses you weren't part of).
+    yourShareCents += e.expense_splits.find((s) => s.user_id === meId)?.amount_cents ?? 0
+  }
+
+  return { totalCents, yourShareCents }
+}
