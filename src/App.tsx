@@ -1,13 +1,17 @@
+import { useState } from 'react'
 import { BalanceCard } from './components/BalanceCard'
 import { Icon } from './components/Icon'
-import { Sidebar } from './components/Sidebar'
-import { TopBar } from './components/TopBar'
 import { Ledger } from './components/Ledger'
-import { EXPENSES, ME, MEMBERS, SUPPLIES } from './sampleData'
-import { Roommates } from './components/Roommates'
-import { monthTotals, netBalances } from './lib/balances'
+import { LogExpenseModal } from './components/LogExpenseModal'
 import { RhythmCheck } from './components/RhythmCheck'
+import { Roommates } from './components/Roommates'
+import { Sidebar } from './components/Sidebar'
 import { Supplies } from './components/Supplies'
+import { TopBar } from './components/TopBar'
+import { monthTotals, netBalances } from './lib/balances'
+import { splitEvenly } from './lib/split'
+import { EXPENSES, ME, MEMBERS, SUPPLIES } from './sampleData'
+import type { Expense, NewExpense } from './types'
 
 function greeting(): string {
   const hour = new Date().getHours()
@@ -17,30 +21,61 @@ function greeting(): string {
 }
 
 export default function App() {
-  // Full month name, e.g. "October"
+  // The expense list is now "state": when it changes, the page redraws
+  const [expenses, setExpenses] = useState<Expense[]>(EXPENSES)
+  // Whether the Log Expense popup is open
+  const [logging, setLogging] = useState(false)
+
   const monthName = new Date().toLocaleDateString('en-US', { month: 'long' })
-  // Net amount per roommate, and the grand total across everyone
-  const net = netBalances(EXPENSES, ME)
+
+  // Everything below is recalculated from "expenses" each time it changes
+  const net = netBalances(expenses, ME)
   const netCents = [...net.values()].reduce((sum, c) => sum + c, 0)
-  // This month's household total and your share
-  const month = monthTotals(EXPENSES, ME)
-  // How many roommates have a non-zero balance, and how many supplies are low
+  const month = monthTotals(expenses, ME)
   const openBalances = [...net.values()].filter((c) => c !== 0).length
   const lowSupplies = SUPPLIES.filter((s) => !s.in_stock).length
 
+  // Turns the form's answers into a full expense and adds it to the top
+  function handleAddExpense(form: NewExpense) {
+    const amounts = splitEvenly(form.totalCents, form.splitWith.length)
+    const id = `local-${Date.now()}` // a made-up id, fine for now
+    const now = new Date().toISOString()
+
+    const newExpense: Expense = {
+      id,
+      household_id: 'h1',
+      description: form.description,
+      category: form.category,
+      total_cents: form.totalCents,
+      paid_by: form.paidBy,
+      expense_date: form.date,
+      created_at: now,
+      // One share per person. The payer's own share counts as already paid.
+      expense_splits: form.splitWith.map((userId, i) => ({
+        expense_id: id,
+        user_id: userId,
+        amount_cents: amounts[i] ?? 0,
+        settled_at: userId === form.paidBy ? now : null,
+      })),
+    }
+
+    // New list = the new expense, then all the old ones
+    setExpenses((current) => [newExpense, ...current])
+    setLogging(false)
+  }
+
   return (
     <div className="app">
-      <Sidebar householdName="Apartment 4124" memberCount={5} />
+      <Sidebar householdName="Apartment 4B" memberCount={MEMBERS.length} />
 
       <div className="main">
         <TopBar userName="Kimiko" />
 
         <main className="content">
-          {/* Page header */}
           <section className="hero">
             <div>
               <div className="eyebrow">
-                Apartment 4124 <span>&middot;</span>
+                Apartment 4B <span>&middot;</span>
                 <span className="ok">All shared accounts current for {monthName}</span>
               </div>
               <h1>{greeting()}, Kimiko</h1>
@@ -50,19 +85,19 @@ export default function App() {
                 <Icon name="scale" size={16} />
                 Settle Balances
               </button>
-              <button type="button" className="btn primary">
+              {/* Opens the popup */}
+              <button type="button" className="btn primary" onClick={() => setLogging(true)}>
                 <Icon name="plus" size={16} />
                 Log Expense
               </button>
             </div>
           </section>
 
-          {/* Two columns of cards */}
           <div className="grid">
             <div className="col">
-              {/* Fake amounts in cents: $142.50, $310.00, $167.50 */}
               <BalanceCard netCents={netCents} monthTotalCents={month.totalCents} yourShareCents={month.yourShareCents} />
-              <Ledger expenses={EXPENSES} members={MEMBERS} meId={ME} />
+              {/* Only the 8 newest expenses are shown */}
+              <Ledger expenses={expenses.slice(0, 8)} members={MEMBERS} meId={ME} />
               <RhythmCheck openBalances={openBalances} lowSupplies={lowSupplies} />
             </div>
             <div className="col">
@@ -72,6 +107,11 @@ export default function App() {
           </div>
         </main>
       </div>
+
+      {/* "&&" means: only draw the popup while logging is true */}
+      {logging && (
+        <LogExpenseModal householdId="h1" members={MEMBERS} meId={ME} onClose={() => setLogging(false)} onSubmit={handleAddExpense} />
+      )}
     </div>
   )
 }
