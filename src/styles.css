@@ -883,3 +883,132 @@ td.num {
 .bars-cap span:last-child {
   text-align: right;
 }
+
+/* ---------- Supplies card ---------- */
+.sup {
+  display: flex;
+  flex-direction: column;
+  margin-top: 14px;
+  gap: 2px;
+}
+
+/* One checklist row: checkbox, name + note, status pill */
+.item {
+  display: grid;
+  grid-template-columns: 18px minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: start;
+  padding: 12px 10px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+/* Items that are running low get a grey background */
+.item.low {
+  background: var(--surface-2);
+}
+
+.item input {
+  width: 15px;
+  height: 15px;
+  margin: 2px 0 0;
+  accent-color: var(--accent); /* green checkmark */
+}
+
+.item b {
+  font-weight: 600;
+  font-size: 12.5px;
+  display: block;
+}
+
+.item small {
+  color: var(--muted);
+  font-size: 11px;
+  display: block;
+}
+
+/* The "Low" / "Stocked" pill */
+.tag {
+  font-size: 10px;
+  font-weight: 600;
+  padding: 3px 8px;
+  border-radius: 999px;
+}
+
+.tag.low {
+  background: var(--warn-bg);
+  color: var(--warn-fg);
+}
+
+.tag.ok {
+  background: var(--ok-bg);
+  color: var(--ok-fg);
+}
+
+/* The + button in the card header */
+.add {
+  background: none;
+  border: 0;
+  color: var(--muted);
+  padding: 2px;
+}
+
+.add:hover {
+  color: var(--accent);
+}
+
+.supplies-foot {
+  margin-top: 18px;
+}
+
+.supplies-foot .link {
+  padding: 0;
+}
+
+/* ---------- Household Rhythm Check strip ---------- */
+.rhythm {
+  background: var(--surface-2);
+  border-radius: 12px;
+  padding: 18px 20px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.rhythm .ico {
+  background: var(--surface);
+  color: var(--accent);
+  width: 36px;
+  height: 36px;
+}
+
+.rhythm b {
+  font-weight: 600;
+  display: block;
+}
+
+.rhythm p {
+  margin: 2px 0 0;
+  color: var(--muted);
+  font-size: 12.5px;
+}
+
+/* The "Optimal Harmony" pill on the right */
+.rhythm .pill {
+  margin-left: auto;
+  background: var(--surface);
+  border-radius: 999px;
+  padding: 8px 14px;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--muted);
+  text-align: center;
+  flex: none;
+}
+
+@media (max-width: 760px) {
+  /* Let the pill drop below the text on phones */
+  .rhythm {
+    flex-wrap: wrap;
+  }
+}

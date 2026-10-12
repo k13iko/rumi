@@ -3,9 +3,11 @@ import { Icon } from './components/Icon'
 import { Sidebar } from './components/Sidebar'
 import { TopBar } from './components/TopBar'
 import { Ledger } from './components/Ledger'
-import { EXPENSES, ME, MEMBERS } from './sampleData'
+import { EXPENSES, ME, MEMBERS, SUPPLIES } from './sampleData'
 import { Roommates } from './components/Roommates'
 import { netBalances } from './lib/balances'
+import { RhythmCheck } from './components/RhythmCheck'
+import { Supplies } from './components/Supplies'
 
 function greeting(): string {
   const hour = new Date().getHours()
@@ -20,6 +22,9 @@ export default function App() {
   // Net amount per roommate, and the grand total across everyone
   const net = netBalances(EXPENSES, ME)
   const netCents = [...net.values()].reduce((sum, c) => sum + c, 0)
+  // How many roommates have a non-zero balance, and how many supplies are low
+  const openBalances = [...net.values()].filter((c) => c !== 0).length
+  const lowSupplies = SUPPLIES.filter((s) => !s.in_stock).length
 
   return (
     <div className="app">
@@ -56,9 +61,11 @@ export default function App() {
               {/* Fake amounts in cents: $142.50, $310.00, $167.50 */}
               <BalanceCard netCents={netCents} monthTotalCents={31000} yourShareCents={16750} />
               <Ledger expenses={EXPENSES} members={MEMBERS} meId={ME} />
+              <RhythmCheck openBalances={openBalances} lowSupplies={lowSupplies} />
             </div>
             <div className="col">
               <Roommates members={MEMBERS} net={net} meId={ME} />
+              <Supplies supplies={SUPPLIES} />
             </div>
           </div>
         </main>

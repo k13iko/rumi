@@ -1,14 +1,14 @@
-import type { Expense, Member, Split } from './types'
+import type { Expense, Member, Split, Supply } from './types'
 
 // Pretend you are the user with id 'me'
 export const ME = 'me'
 
 export const MEMBERS: Member[] = [
   { user_id: 'me', display_name: 'Kimiko Low' },
-  { user_id: 'marcus', display_name: 'Marcus Chen' },
-  { user_id: 'sarah', display_name: 'Sarah Jenkins' },
-  { user_id: 'liam', display_name: 'Liam Vance' },
-  { user_id: 'carlos', display_name: 'Carlos Diaz' },
+  { user_id: 'marcus', display_name: 'Max Yun' },
+  { user_id: 'sarah', display_name: 'Trinity Li' },
+  { user_id: 'liam', display_name: 'Ethan Vail' },
+  { user_id: 'carlos', display_name: 'Ryu Hoshino' },
 ]
 
 const EVERYONE = MEMBERS.map((m) => m.user_id)
@@ -70,4 +70,11 @@ export const EXPENSES: Expense[] = [
     // Only 3 people shared this one, and everyone has paid
     expense_splits: shares('e4', ['me', 'liam', 'sarah'], 1400, 'liam', true),
   },
+]
+
+export const SUPPLIES: Supply[] = [
+  { id: 's1', household_id: 'h1', name: 'Paper Towels', note: 'Claimed by Marcus \u2022 Will purchase Fri', in_stock: false },
+  { id: 's2', household_id: 'h1', name: 'Eco Dish Soap (Refill)', note: 'Under the sink 2.5L reserve', in_stock: true },
+  { id: 's3', household_id: 'h1', name: 'Extra Virgin Olive Oil', note: 'New bottle opened yesterday', in_stock: true },
+  { id: 's4', household_id: 'h1', name: 'Compost & Trash Liners', note: 'Added by Carlos \u2022 4 bags remaining', in_stock: false },
 ]
