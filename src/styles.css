@@ -757,3 +757,129 @@ td.num {
   padding: 24px 8px;
   font-size: 13px;
 }
+
+/* ---------- Roommate balances card ---------- */
+.rm-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.rm-head > svg {
+  color: var(--muted);
+}
+
+.rm-list {
+  display: flex;
+  flex-direction: column;
+  margin-top: 12px;
+}
+
+/* One roommate row: avatar, name + amount, button */
+.rm {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 8px;
+  border-radius: 10px;
+}
+
+/* Highlighted row: used when you owe this person */
+.rm.me {
+  background: var(--surface-2);
+}
+
+.rm .who {
+  flex: 1;
+  min-width: 0;
+}
+
+.rm .who b {
+  font-weight: 600;
+  display: block;
+  overflow-wrap: anywhere;
+}
+
+.rm .who small {
+  font-size: 11.5px;
+  color: var(--muted);
+}
+
+.rm .who small span {
+  font-weight: 600;
+  display: block;
+  font-variant-numeric: tabular-nums;
+}
+
+.rm .who small .in {
+  color: var(--owed);
+}
+
+.rm .who small .out {
+  color: var(--owe);
+}
+
+/* Small pill button (Request, Remind) */
+.mini {
+  border: 0;
+  background: var(--surface-2);
+  border-radius: 999px;
+  padding: 6px 12px;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.mini:hover {
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+/* The green Settle button */
+.mini.settle {
+  background: var(--accent);
+  color: var(--accent-fg);
+  padding: 8px 14px;
+  line-height: 1.25;
+  text-align: center;
+}
+
+.mini.settle:hover {
+  filter: brightness(1.1);
+  color: var(--accent-fg);
+  background: var(--accent);
+}
+
+/* Thin bar: green = money coming, orange = money to pay, faded = clear */
+.bars {
+  display: flex;
+  gap: 4px;
+  margin-top: 18px;
+}
+
+.bars i {
+  height: 4px;
+  border-radius: 4px;
+  background: var(--accent);
+}
+
+.bars i.pay {
+  background: var(--owe);
+}
+
+.bars i.clear {
+  background: var(--accent);
+  opacity: 0.35;
+}
+
+.bars-cap {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 10.5px;
+  color: var(--muted);
+  margin-top: 6px;
+}
+
+.bars-cap span:last-child {
+  text-align: right;
+}

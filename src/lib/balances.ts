@@ -29,3 +29,24 @@ export function ledgerShare(e: Expense, meId: string): LedgerShare {
   if (!mine) return { kind: 'none' }
   return mine.settled_at ? { kind: 'settled', cents: mine.amount_cents } : { kind: 'owe', cents: mine.amount_cents }
 }
+
+// Works out, for each roommate, the net amount between you and them.
+// Positive means they owe you. Negative means you owe them.
+// Returns a Map: a lookup table from user id to cents.
+export function netBalances(expenses: Expense[], meId: string): Map<string, number> {
+  const net = new Map<string, number>()
+
+  // Adds an amount to someone's running total (starting from 0)
+  const add = (id: string, cents: number) => net.set(id, (net.get(id) ?? 0) + cents)
+
+  for (const e of expenses) {
+    for (const s of e.expense_splits) {
+      // Skip shares that are already paid, and the payer's own share
+      if (s.settled_at || s.user_id === e.paid_by) continue
+
+      if (e.paid_by === meId) add(s.user_id, s.amount_cents) // you paid: they owe you
+      else if (s.user_id === meId) add(e.paid_by, -s.amount_cents) // they paid: you owe them
+    }
+  }
+  return net
+}

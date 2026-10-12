@@ -4,6 +4,8 @@ import { Sidebar } from './components/Sidebar'
 import { TopBar } from './components/TopBar'
 import { Ledger } from './components/Ledger'
 import { EXPENSES, ME, MEMBERS } from './sampleData'
+import { Roommates } from './components/Roommates'
+import { netBalances } from './lib/balances'
 
 function greeting(): string {
   const hour = new Date().getHours()
@@ -15,6 +17,9 @@ function greeting(): string {
 export default function App() {
   // Full month name, e.g. "October"
   const monthName = new Date().toLocaleDateString('en-US', { month: 'long' })
+  // Net amount per roommate, and the grand total across everyone
+  const net = netBalances(EXPENSES, ME)
+  const netCents = [...net.values()].reduce((sum, c) => sum + c, 0)
 
   return (
     <div className="app">
@@ -49,10 +54,12 @@ export default function App() {
           <div className="grid">
             <div className="col">
               {/* Fake amounts in cents: $142.50, $310.00, $167.50 */}
-              <BalanceCard netCents={-2800} monthTotalCents={31000} yourShareCents={16750} />
+              <BalanceCard netCents={netCents} monthTotalCents={31000} yourShareCents={16750} />
               <Ledger expenses={EXPENSES} members={MEMBERS} meId={ME} />
             </div>
-            <div className="col">{/* Roommates and supplies cards go here later */}</div>
+            <div className="col">
+              <Roommates members={MEMBERS} net={net} meId={ME} />
+            </div>
           </div>
         </main>
       </div>
