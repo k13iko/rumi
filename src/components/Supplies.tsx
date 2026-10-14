@@ -6,9 +6,10 @@ interface Props {
   supplies: Supply[]
   onToggle: (supply: Supply, inStock: boolean) => void
   onAdd: (name: string, note: string) => void
+  onRemove: (supply: Supply) => void
 }
 
-export function Supplies({ supplies, onToggle, onAdd }: Props) {
+export function Supplies({ supplies, onToggle, onAdd, onRemove }: Props) {
   const [adding, setAdding] = useState(false)
   const [name, setName] = useState('')
   const [note, setNote] = useState('')
@@ -55,6 +56,19 @@ export function Supplies({ supplies, onToggle, onAdd }: Props) {
               {s.note && <small>{s.note}</small>}
             </span>
             <span className={`tag ${s.in_stock ? 'ok' : 'low'}`}>{s.in_stock ? 'Stocked' : 'Low'}</span>
+            {/* preventDefault stops the click from also ticking the checkbox */}
+            <button
+              type="button"
+              className="del"
+              aria-label={`Remove ${s.name}`}
+              title="Remove"
+              onClick={(e) => {
+                e.preventDefault()
+                onRemove(s)
+              }}
+            >
+              ×
+            </button>
           </label>
         ))}
       </div>

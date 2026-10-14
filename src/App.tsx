@@ -98,6 +98,12 @@ export default function App() {
     show(`Added ${name} to the list.`)
   }
 
+  function handleRemoveSupply(supply: Supply) {
+    const before = supplies // remember the list so Undo can restore it
+    setSupplies(supplies.filter((s) => s.id !== supply.id))
+    show(`Removed ${supply.name}.`, { label: 'Undo', onClick: () => setSupplies(before) })
+  }
+
   return (
     <div className="app">
       <Sidebar householdName="Apartment 4B" memberCount={MEMBERS.length} />
@@ -140,7 +146,7 @@ export default function App() {
               <div id="roommates">
                 <Roommates members={MEMBERS} expenses={expenses} net={net} meId={ME} onSettle={handleSettle} onRequest={(m, c, r) => void handleRequest(m, c, r)} />
               </div>
-              <Supplies supplies={supplies} onToggle={handleToggleSupply} onAdd={handleAddSupply} />
+              <Supplies supplies={supplies} onToggle={handleToggleSupply} onAdd={handleAddSupply} onRemove={handleRemoveSupply} />
             </div>
           </div>
         </main>
