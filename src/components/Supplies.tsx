@@ -1,7 +1,27 @@
+import { useState, type FormEvent } from 'react'
 import { Icon } from './Icon'
 import type { Supply } from '../types'
 
-export function Supplies({ supplies }: { supplies: Supply[] }) {
+interface Props {
+  supplies: Supply[]
+  onToggle: (supply: Supply, inStock: boolean) => void
+  onAdd: (name: string, note: string) => void
+}
+
+export function Supplies({ supplies, onToggle, onAdd }: Props) {
+  const [adding, setAdding] = useState(false)
+  const [name, setName] = useState('')
+  const [note, setNote] = useState('')
+
+  function submit(e: FormEvent) {
+    e.preventDefault()
+    if (!name.trim()) return
+    onAdd(name.trim(), note.trim())
+    setName('')
+    setNote('')
+    setAdding(false)
+  }
+
   return (
     <section className="card">
       <div className="rm-head">
@@ -9,23 +29,29 @@ export function Supplies({ supplies }: { supplies: Supply[] }) {
           <h2>Supplies &amp; Staples</h2>
           <div className="sub">Low restock checklist</div>
         </div>
-        {/* Doesn't do anything yet. We wire it up in Step 6. */}
-        <button type="button" className="add" aria-label="Add a supply">
+        <button type="button" className="add" aria-label="Add a supply" aria-expanded={adding} onClick={() => setAdding((open) => !open)}>
           <Icon name="plus" />
         </button>
       </div>
+
+      {adding && (
+        <form className="supply-form" onSubmit={submit}>
+          <input id="supply-name" value={name} onChange={(e) => setName(e.target.value)} placeholder="What is running low?" aria-label="Supply name" maxLength={80} autoFocus />
+          <input id="supply-note" value={note} onChange={(e) => setNote(e.target.value)} placeholder="Note (optional)" aria-label="Supply note" maxLength={160} />
+          <button className="btn primary" type="submit">
+            Add to list
+          </button>
+        </form>
+      )}
 
       <div className="sup">
         {supplies.length === 0 && <div className="empty">Nothing on the list. Tap + when something runs low.</div>}
 
         {supplies.map((s) => (
-          // A <label> makes the whole row clickable. Low items get an extra class.
           <label key={s.id} className={`item${s.in_stock ? '' : ' low'}`}>
-            {/* readOnly: the box shows the state but can't change it yet */}
-            <input type="checkbox" checked={s.in_stock} readOnly />
+            <input type="checkbox" checked={s.in_stock} onChange={(e) => onToggle(s, e.target.checked)} />
             <span>
               <b>{s.name}</b>
-              {/* Only show the note if there is one */}
               {s.note && <small>{s.note}</small>}
             </span>
             <span className={`tag ${s.in_stock ? 'ok' : 'low'}`}>{s.in_stock ? 'Stocked' : 'Low'}</span>

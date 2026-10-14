@@ -1,19 +1,30 @@
 import { Avatar } from './Avatar'
 import { Icon } from './Icon'
+import { oldestOpenDate } from '../lib/balances'
 import { formatCents, formatCentsShort } from '../lib/money'
-import type { Member } from '../types'
+import type { Expense, Member } from '../types'
+
+// After this many days unpaid, "Request" becomes "Remind"
+const REMIND_AFTER_DAYS = 7
+
+// How many whole days ago was "2026-10-04"?
+function daysSince(iso: string): number {
+  const then = new Date(`${iso}T00:00:00`).getTime()
+  return Math.floor((Date.now() - then) / 86_400_000)
+}
 
 interface Props {
   members: Member[]
-  net: Map<string, number> // user id -> cents, from netBalances
+  expenses: Expense[]
+  net: Map<string, number>
   meId: string
+  onSettle: (member: Member) => void
+  onRequest: (member: Member, cents: number, isReminder: boolean) => void
 }
 
-export function Roommates({ members, net, meId }: Props) {
-  // Everyone except you
+export function Roommates({ members, expenses, net, meId, onSettle, onRequest }: Props) {
   const others = members.filter((m) => m.user_id !== meId)
 
-  // Count how many people owe you, how many you owe, and how many are even
   const toReceive = others.filter((m) => (net.get(m.user_id) ?? 0) > 0).length
   const toPay = others.filter((m) => (net.get(m.user_id) ?? 0) < 0).length
   const clear = others.length - toReceive - toPay
@@ -32,11 +43,12 @@ export function Roommates({ members, net, meId }: Props) {
         {others.length === 0 && <div className="empty">Nobody else has joined yet.</div>}
 
         {others.map((m) => {
-          // "?? 0" means: if there's no entry for this person, use 0
           const cents = net.get(m.user_id) ?? 0
 
+          const oldest = oldestOpenDate(expenses, meId, m.user_id)
+          const isReminder = cents > 0 && oldest !== null && daysSince(oldest) >= REMIND_AFTER_DAYS
+
           return (
-            // Highlight the row if you owe this person
             <div key={m.user_id} className={`rm${cents < 0 ? ' me' : ''}`}>
               <Avatar id={m.user_id} name={m.display_name} />
 
@@ -55,15 +67,27 @@ export function Roommates({ members, net, meId }: Props) {
                 {cents === 0 && <small>settled up</small>}
               </div>
 
-              {/* They owe you: Request button. You owe them: Settle button.
-                  Neither does anything yet. We wire them up in Step 6. */}
+              {/* They owe you: Request/Remind, plus a ✓ to mark it received */}
               {cents > 0 && (
-                <button type="button" className="mini">
-                  Request
-                </button>
+                <>
+                  <button type="button" className="mini" onClick={() => onRequest(m, cents, isReminder)}>
+                    {isReminder ? 'Remind' : 'Request'}
+                  </button>
+                  <button
+                    type="button"
+                    className="mini icon"
+                    aria-label={`Mark ${m.display_name} as paid`}
+                    title="Mark as received"
+                    onClick={() => onSettle(m)}
+                  >
+                    <Icon name="check" size={14} />
+                  </button>
+                </>
               )}
+
+              {/* You owe them: green Settle button showing the amount */}
               {cents < 0 && (
-                <button type="button" className="mini settle">
+                <button type="button" className="mini settle" onClick={() => onSettle(m)}>
                   Settle
                   <br />
                   {formatCentsShort(-cents)}
@@ -74,11 +98,9 @@ export function Roommates({ members, net, meId }: Props) {
         })}
       </div>
 
-      {/* The thin bar and its caption, only if there are roommates */}
       {others.length > 0 && (
         <>
           <div className="bars" aria-hidden="true">
-            {/* Each segment's width is proportional to its count */}
             {toReceive > 0 && <i style={{ flex: toReceive }} />}
             {toPay > 0 && <i className="pay" style={{ flex: toPay }} />}
             {clear > 0 && <i className="clear" style={{ flex: clear }} />}

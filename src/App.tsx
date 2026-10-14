@@ -8,10 +8,12 @@ import { Roommates } from './components/Roommates'
 import { Sidebar } from './components/Sidebar'
 import { Supplies } from './components/Supplies'
 import { TopBar } from './components/TopBar'
-import { monthTotals, netBalances } from './lib/balances'
+import { useToast } from './hooks/useToast'
+import { monthTotals, netBalances, settleBetween } from './lib/balances'
+import { formatCents } from './lib/money'
 import { splitEvenly } from './lib/split'
 import { EXPENSES, ME, MEMBERS, SUPPLIES } from './sampleData'
-import type { Expense, NewExpense } from './types'
+import type { Expense, Member, NewExpense, Supply } from './types'
 
 function greeting(): string {
   const hour = new Date().getHours()
@@ -21,24 +23,23 @@ function greeting(): string {
 }
 
 export default function App() {
-  // The expense list is now "state": when it changes, the page redraws
   const [expenses, setExpenses] = useState<Expense[]>(EXPENSES)
-  // Whether the Log Expense popup is open
+  const [supplies, setSupplies] = useState<Supply[]>(SUPPLIES)
   const [logging, setLogging] = useState(false)
+  const { show, node: toastNode } = useToast()
 
   const monthName = new Date().toLocaleDateString('en-US', { month: 'long' })
 
-  // Everything below is recalculated from "expenses" each time it changes
   const net = netBalances(expenses, ME)
   const netCents = [...net.values()].reduce((sum, c) => sum + c, 0)
   const month = monthTotals(expenses, ME)
   const openBalances = [...net.values()].filter((c) => c !== 0).length
-  const lowSupplies = SUPPLIES.filter((s) => !s.in_stock).length
+  const lowSupplies = supplies.filter((s) => !s.in_stock).length
 
-  // Turns the form's answers into a full expense and adds it to the top
+  // --- Expenses ---
   function handleAddExpense(form: NewExpense) {
     const amounts = splitEvenly(form.totalCents, form.splitWith.length)
-    const id = `local-${Date.now()}` // a made-up id, fine for now
+    const id = `local-${Date.now()}`
     const now = new Date().toISOString()
 
     const newExpense: Expense = {
@@ -50,7 +51,6 @@ export default function App() {
       paid_by: form.paidBy,
       expense_date: form.date,
       created_at: now,
-      // One share per person. The payer's own share counts as already paid.
       expense_splits: form.splitWith.map((userId, i) => ({
         expense_id: id,
         user_id: userId,
@@ -59,9 +59,43 @@ export default function App() {
       })),
     }
 
-    // New list = the new expense, then all the old ones
     setExpenses((current) => [newExpense, ...current])
     setLogging(false)
+    show(`Added ${form.description} to the ledger.`)
+  }
+
+  function handleSettle(member: Member) {
+    const before = expenses // remember the list as it was before settling
+    setExpenses(settleBetween(expenses, ME, member.user_id))
+    show(`Settled up with ${member.display_name.split(' ')[0]}.`, {
+      label: 'Undo',
+      onClick: () => setExpenses(before), // put the old list back
+    })
+  }
+
+  async function handleRequest(member: Member, cents: number, isReminder: boolean) {
+    const first = member.display_name.split(' ')[0]
+    const text = isReminder
+      ? `Hi ${first}, a friendly reminder that you owe ${formatCents(cents)} for our shared expenses in Apartment 4B.`
+      : `Hi ${first}, you owe ${formatCents(cents)} for our shared expenses in Apartment 4B. Thanks!`
+    try {
+      await navigator.clipboard.writeText(text)
+      show(`Message for ${first} copied. Paste it into your chat.`)
+    } catch {
+      show('Could not copy the message. Your browser blocked clipboard access.')
+    }
+  }
+
+  // --- Supplies ---
+  function handleToggleSupply(supply: Supply, inStock: boolean) {
+    setSupplies((current) => current.map((s) => (s.id === supply.id ? { ...s, in_stock: inStock } : s)))
+    show(inStock ? `${supply.name} marked as stocked.` : `${supply.name} marked as low.`)
+  }
+
+  function handleAddSupply(name: string, note: string) {
+    const supply: Supply = { id: `local-${Date.now()}`, household_id: 'h1', name, note: note || null, in_stock: false }
+    setSupplies((current) => [...current, supply])
+    show(`Added ${name} to the list.`)
   }
 
   return (
@@ -81,11 +115,14 @@ export default function App() {
               <h1>{greeting()}, Kimiko</h1>
             </div>
             <div className="actions">
-              <button type="button" className="btn">
+              <button
+                type="button"
+                className="btn"
+                onClick={() => document.getElementById('roommates')?.scrollIntoView({ behavior: 'smooth', block: 'center' })}
+              >
                 <Icon name="scale" size={16} />
                 Settle Balances
               </button>
-              {/* Opens the popup */}
               <button type="button" className="btn primary" onClick={() => setLogging(true)}>
                 <Icon name="plus" size={16} />
                 Log Expense
@@ -96,22 +133,21 @@ export default function App() {
           <div className="grid">
             <div className="col">
               <BalanceCard netCents={netCents} monthTotalCents={month.totalCents} yourShareCents={month.yourShareCents} />
-              {/* Only the 8 newest expenses are shown */}
               <Ledger expenses={expenses.slice(0, 8)} members={MEMBERS} meId={ME} />
               <RhythmCheck openBalances={openBalances} lowSupplies={lowSupplies} />
             </div>
             <div className="col">
-              <Roommates members={MEMBERS} net={net} meId={ME} />
-              <Supplies supplies={SUPPLIES} />
+              <div id="roommates">
+                <Roommates members={MEMBERS} expenses={expenses} net={net} meId={ME} onSettle={handleSettle} onRequest={(m, c, r) => void handleRequest(m, c, r)} />
+              </div>
+              <Supplies supplies={supplies} onToggle={handleToggleSupply} onAdd={handleAddSupply} />
             </div>
           </div>
         </main>
       </div>
 
-      {/* "&&" means: only draw the popup while logging is true */}
-      {logging && (
-        <LogExpenseModal householdId="h1" members={MEMBERS} meId={ME} onClose={() => setLogging(false)} onSubmit={handleAddExpense} />
-      )}
+      {logging && <LogExpenseModal householdId="h1" members={MEMBERS} meId={ME} onClose={() => setLogging(false)} onSubmit={handleAddExpense} />}
+      {toastNode}
     </div>
   )
 }

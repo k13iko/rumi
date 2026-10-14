@@ -1123,3 +1123,75 @@ td.num {
     grid-template-columns: 1fr;
   }
 }
+
+/* ---------- Toast message ---------- */
+/* The small dark pill at the bottom of the screen */
+.toast {
+  position: fixed;
+  left: 50%;
+  bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+  transform: translateX(-50%);
+  background: var(--fg);
+  color: var(--bg);
+  padding: 11px 18px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 500;
+  z-index: 30;
+  max-width: calc(100vw - 32px);
+  text-align: center;
+}
+
+/* ---------- Extra roommate and supply styles ---------- */
+/* The round ✓ button next to Request */
+.mini.icon {
+  padding: 6px;
+  display: grid;
+  place-items: center;
+  color: var(--muted);
+}
+
+/* Keep small buttons readable on the highlighted row */
+.rm.me .mini:not(.settle) {
+  background: var(--surface);
+}
+
+/* The "add a supply" form */
+.supply-form {
+  display: grid;
+  gap: 8px;
+  margin-top: 14px;
+}
+
+.supply-form input {
+  font: inherit;
+  color: var(--fg);
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 10px 12px;
+  width: 100%;
+}
+
+button:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+/* Lets the toast hold a button next to its text */
+.toast {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.toast button {
+  font: inherit;
+  font-weight: 700;
+  color: inherit;
+  background: none;
+  border: 0;
+  padding: 0;
+  text-decoration: underline;
+  cursor: pointer;
+}

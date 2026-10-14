@@ -81,3 +81,37 @@ export function monthTotals(expenses: Expense[], meId: string, now = new Date())
 
   return { totalCents, yourShareCents }
 }
+
+// Returns a NEW list of expenses where every unpaid share between you
+// and one roommate (in either direction) is marked as paid.
+// We never change the old list. We build a new one, so React notices.
+export function settleBetween(expenses: Expense[], meId: string, otherId: string): Expense[] {
+  const now = new Date().toISOString()
+
+  return expenses.map((e) => ({
+    ...e, // copy all the expense's fields...
+    expense_splits: e.expense_splits.map((s) => {
+      // Is this share between you and them? Either person could have paid.
+      const betweenUs = (s.user_id === meId && e.paid_by === otherId) || (s.user_id === otherId && e.paid_by === meId)
+
+      // If so (and it's unpaid), copy it with a paid time. Otherwise keep it.
+      return betweenUs && !s.settled_at ? { ...s, settled_at: now } : s
+    }),
+  }))
+}
+
+// The date of the oldest expense that still has an unpaid share between
+// you and one roommate. Used to decide between "Request" and "Remind".
+export function oldestOpenDate(expenses: Expense[], meId: string, otherId: string): string | null {
+  let oldest: string | null = null
+
+  for (const e of expenses) {
+    // "some" is true if at least one share matches
+    const open = e.expense_splits.some(
+      (s) => !s.settled_at && ((s.user_id === meId && e.paid_by === otherId) || (s.user_id === otherId && e.paid_by === meId)),
+    )
+    // Dates like "2026-10-04" sort correctly as plain text
+    if (open && (oldest === null || e.expense_date < oldest)) oldest = e.expense_date
+  }
+  return oldest
+}
