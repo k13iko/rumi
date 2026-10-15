@@ -86,14 +86,15 @@ export default function App() {
     }
   }
 
-  // --- Supplies ---
   function handleToggleSupply(supply: Supply, inStock: boolean) {
-    setSupplies((current) => current.map((s) => (s.id === supply.id ? { ...s, in_stock: inStock } : s)))
+    setSupplies((current) =>
+      current.map((s) => (s.id === supply.id ? { ...s, in_stock: inStock, claimed_by: inStock ? null : s.claimed_by } : s)),
+    )
     show(inStock ? `${supply.name} marked as stocked.` : `${supply.name} marked as low.`)
   }
 
-  function handleAddSupply(name: string, note: string) {
-    const supply: Supply = { id: `local-${Date.now()}`, household_id: 'h1', name, note: note || null, in_stock: false }
+  function handleAddSupply(name: string) {
+    const supply: Supply = { id: `local-${Date.now()}`, household_id: 'h1', name, in_stock: false, claimed_by: null }
     setSupplies((current) => [...current, supply])
     show(`Added ${name} to the list.`)
   }
@@ -102,6 +103,11 @@ export default function App() {
     const before = supplies // remember the list so Undo can restore it
     setSupplies(supplies.filter((s) => s.id !== supply.id))
     show(`Removed ${supply.name}.`, { label: 'Undo', onClick: () => setSupplies(before) })
+  }
+
+  function handleClaim(supply: Supply, claim: boolean) {
+    setSupplies((current) => current.map((s) => (s.id === supply.id ? { ...s, claimed_by: claim ? ME : null } : s)))
+    show(claim ? `You're getting ${supply.name}.` : `Unclaimed ${supply.name}.`)
   }
 
   return (
@@ -146,7 +152,7 @@ export default function App() {
               <div id="roommates">
                 <Roommates members={MEMBERS} expenses={expenses} net={net} meId={ME} onSettle={handleSettle} onRequest={(m, c, r) => void handleRequest(m, c, r)} />
               </div>
-              <Supplies supplies={supplies} onToggle={handleToggleSupply} onAdd={handleAddSupply} onRemove={handleRemoveSupply} />
+              <Supplies supplies={supplies} members={MEMBERS} meId={ME} onToggle={handleToggleSupply} onAdd={handleAddSupply} onRemove={handleRemoveSupply} onClaim={handleClaim} />
             </div>
           </div>
         </main>

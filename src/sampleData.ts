@@ -73,8 +73,8 @@ export const EXPENSES: Expense[] = [
 ]
 
 export const SUPPLIES: Supply[] = [
-  { id: 's1', household_id: 'h1', name: 'Paper Towels', note: 'Claimed by Marcus \u2022 Will purchase Fri', in_stock: false },
-  { id: 's2', household_id: 'h1', name: 'Eco Dish Soap (Refill)', note: 'Under the sink 2.5L reserve', in_stock: true },
-  { id: 's3', household_id: 'h1', name: 'Extra Virgin Olive Oil', note: 'New bottle opened yesterday', in_stock: true },
-  { id: 's4', household_id: 'h1', name: 'Compost & Trash Liners', note: 'Added by Carlos \u2022 4 bags remaining', in_stock: false },
+  { id: 's1', household_id: 'h1', name: 'Paper Towels', in_stock: false, claimed_by: null, },
+  { id: 's2', household_id: 'h1', name: 'Eco Dish Soap (Refill)', in_stock: true, claimed_by: null, },
+  { id: 's3', household_id: 'h1', name: 'Extra Virgin Olive Oil', in_stock: true, claimed_by: null, },
+  { id: 's4', household_id: 'h1', name: 'Compost & Trash Liners', in_stock: false, claimed_by: null, },
 ]

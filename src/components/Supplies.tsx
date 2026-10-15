@@ -1,25 +1,26 @@
 import { useState, type FormEvent } from 'react'
 import { Icon } from './Icon'
-import type { Supply } from '../types'
+import type { Member, Supply } from '../types'
 
 interface Props {
   supplies: Supply[]
+  members: Member[]
+  meId: string
   onToggle: (supply: Supply, inStock: boolean) => void
-  onAdd: (name: string, note: string) => void
+  onAdd: (name: string) => void
   onRemove: (supply: Supply) => void
+  onClaim: (supply: Supply, claim: boolean) => void
 }
 
-export function Supplies({ supplies, onToggle, onAdd, onRemove }: Props) {
+export function Supplies({ supplies, members, meId, onToggle, onAdd, onRemove, onClaim }: Props) {
   const [adding, setAdding] = useState(false)
   const [name, setName] = useState('')
-  const [note, setNote] = useState('')
 
   function submit(e: FormEvent) {
     e.preventDefault()
     if (!name.trim()) return
-    onAdd(name.trim(), note.trim())
+    onAdd(name.trim())
     setName('')
-    setNote('')
     setAdding(false)
   }
 
@@ -38,7 +39,6 @@ export function Supplies({ supplies, onToggle, onAdd, onRemove }: Props) {
       {adding && (
         <form className="supply-form" onSubmit={submit}>
           <input id="supply-name" value={name} onChange={(e) => setName(e.target.value)} placeholder="What is running low?" aria-label="Supply name" maxLength={80} autoFocus />
-          <input id="supply-note" value={note} onChange={(e) => setNote(e.target.value)} placeholder="Note (optional)" aria-label="Supply note" maxLength={160} />
           <button className="btn primary" type="submit">
             Add to list
           </button>
@@ -48,29 +48,63 @@ export function Supplies({ supplies, onToggle, onAdd, onRemove }: Props) {
       <div className="sup">
         {supplies.length === 0 && <div className="empty">Nothing on the list. Tap + when something runs low.</div>}
 
-        {supplies.map((s) => (
-          <label key={s.id} className={`item${s.in_stock ? '' : ' low'}`}>
-            <input type="checkbox" checked={s.in_stock} onChange={(e) => onToggle(s, e.target.checked)} />
-            <span>
-              <b>{s.name}</b>
-              {s.note && <small>{s.note}</small>}
-            </span>
-            <span className={`tag ${s.in_stock ? 'ok' : 'low'}`}>{s.in_stock ? 'Stocked' : 'Low'}</span>
-            {/* preventDefault stops the click from also ticking the checkbox */}
-            <button
-              type="button"
-              className="del"
-              aria-label={`Remove ${s.name}`}
-              title="Remove"
-              onClick={(e) => {
-                e.preventDefault()
-                onRemove(s)
-              }}
-            >
-              ×
-            </button>
-          </label>
-        ))}
+        {supplies.map((s) => {
+          const claimer = members.find((m) => m.user_id === s.claimed_by)
+          const mine = s.claimed_by === meId
+
+          return (
+            <label key={s.id} className={`item${s.in_stock ? '' : ' low'}`}>
+              <input type="checkbox" checked={s.in_stock} onChange={(e) => onToggle(s, e.target.checked)} />
+              <span>
+                <b>{s.name}</b>
+
+                {!s.in_stock && !claimer && (
+                  <button
+                    type="button"
+                    className="link claim solid"
+                    onClick={(e) => {
+                      e.preventDefault()
+                      onClaim(s, true)
+                    }}
+                  >
+                    Claim
+                  </button>
+                )}
+
+                {!s.in_stock && claimer && (
+                  <small className="claimed">
+                    {mine ? 'You are getting this' : `${claimer.display_name.split(' ')[0]} is getting this`}
+                  </small>
+                )}
+                {!s.in_stock && mine && (
+                  <button
+                    type="button"
+                    className="link claim"
+                    onClick={(e) => {
+                      e.preventDefault()
+                      onClaim(s, false)
+                    }}
+                  >
+                    Unclaim
+                  </button>
+                )}
+              </span>
+              <span className={`tag ${s.in_stock ? 'ok' : 'low'}`}>{s.in_stock ? 'Stocked' : 'Low'}</span>
+              <button
+                type="button"
+                className="del"
+                aria-label={`Remove ${s.name}`}
+                title="Remove"
+                onClick={(e) => {
+                  e.preventDefault()
+                  onRemove(s)
+                }}
+              >
+                ×
+              </button>
+            </label>
+          )
+        })}
       </div>
 
       <div className="supplies-foot">

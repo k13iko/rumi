@@ -1215,3 +1215,37 @@ button:disabled {
 .item .del:hover {
   color: var(--owe);
 }
+
+/* The Claim / Unclaim button */
+.item .claim {
+  margin-top: 8px;
+  padding: 5px 14px;
+  font-size: 12px;
+  font-weight: 600;
+  border: 1px solid var(--accent);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--accent);
+}
+
+.item .claim:hover {
+  background: var(--accent-soft);
+  text-decoration: none;
+}
+
+/* Claim is the filled green button. Unclaim stays outlined. */
+.item .claim.solid {
+  background: var(--accent);
+  color: var(--accent-fg);
+}
+
+.item .claim.solid:hover {
+  filter: brightness(1.08);
+  background: var(--accent);
+}
+
+.item .claimed {
+  margin-top: 6px;
+  color: var(--accent);
+  font-weight: 600;
+}

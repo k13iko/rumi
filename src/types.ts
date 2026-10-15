@@ -42,8 +42,8 @@ export interface Supply {
   id: string
   household_id: string
   name: string
-  note: string | null
   in_stock: boolean
+  claimed_by: string | null // user id of the roommate getting it, or null
 }
 
 export interface NewExpense {
